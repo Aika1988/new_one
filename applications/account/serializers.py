@@ -13,32 +13,24 @@ class RegisterSerializer(serializers.ModelSerializer):
     write_only=True
     )
    
-
     class Meta:
         model = User
         fields = ('email', 'password', 'password2')
-
 
     def validate_email(self, email):
         print('hello')
         return email
 
-
     def validate(self, attrs):
         p1 = attrs.get('password')
         p2 = attrs.pop('password2')
-
         if p1 != p2:
             raise serializers.ValidationError('Password did not match!!')
-
         return attrs    
     
-
-
     def create(self, validate_data):
         user = User.objects.create_user(**validate_data)
         send_activation_code(user.email, user.activation_code)
-
         return user
 
 
@@ -47,6 +39,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
 
     def validate_email(self, email):
+        # print(User.objects.all(), '!!!!!!!!!!!!!!!!!!!')
         if User.objects.filter(email=email).exists():
             return email
         raise serializers.ValidationError('Пользователь не найден!') 
@@ -54,8 +47,6 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
-    
-
         user = authenticate(username=email, password=password)  
         if not user:
             raise serializers.ValidationError('Неверный пароль!')
