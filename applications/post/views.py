@@ -1,7 +1,12 @@
 from rest_framework import generics
 from applications.post.models import Post
 from applications.post.serializers import PostSerializer
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from applications.post.permissions import IsOwner
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 
+# CRUD на классах
 # class PostListAPIView(generics.ListAPIView): # get запрос
 #     queryset = Post.objects.all()
 #     serializer_class = PostSerializer
@@ -27,11 +32,29 @@ from applications.post.serializers import PostSerializer
 #     lookup_field = 'id'
 
 
+# CRUD только двумя способами
 class PostListCreateAPIView(generics.ListCreateAPIView):
+    permission_classes = [IsOwner]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    # filterset_fields = ['owner', 'title']
+    search_fields = ['title'] 
+    ordering_fields = ['id']
+
+    # так можно переопределять queryset чтобы получить страницу по владельцу(фильтрация страниц)
+    # def get_queryset(self):
+    #     queryset = super().get_queryset()
+    #     # queryset = queryset.filter(owner=2)
+    #     # print(self.request.query_params)
+    #     filter_owner = self.request.query_params.get('owner')
+    #     if filter_owner:
+    #         queryset = queryset.filter(owner=filter_owner)
+    #     return queryset
+
 class PostDetailDeleteUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwner]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 

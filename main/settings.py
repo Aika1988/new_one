@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # modules
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
 
     # my apps
     'applications.account',
