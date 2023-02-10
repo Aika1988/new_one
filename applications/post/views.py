@@ -5,6 +5,14 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from applications.post.permissions import IsOwner
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+# from rest_framework.pagination import PageNumberPagination
+
+
+# class CustomPagination():
+#     page_size = 1
+#     page_size_query_param = 'page_size'
+#     max_page_size = 10000
+
 
 # CRUD на классах
 # class PostListAPIView(generics.ListAPIView): # get запрос
@@ -37,11 +45,12 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [IsOwner]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    # pagination_class = CustomPagination
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
     # filterset_fields = ['owner', 'title']
     search_fields = ['title'] 
-    ordering_fields = ['id']
+    ordering_fields = ['id', 'owner']
 
     # так можно переопределять queryset чтобы получить страницу по владельцу(фильтрация страниц)
     # def get_queryset(self):
@@ -52,6 +61,9 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
     #     if filter_owner:
     #         queryset = queryset.filter(owner=filter_owner)
     #     return queryset
+
+    def perform_create(self, serializer): # чтобы вызвать сериалайзер
+        serializer.save(owner=self.request.user)
 
 class PostDetailDeleteUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwner]
