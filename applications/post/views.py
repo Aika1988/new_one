@@ -1,17 +1,20 @@
 from rest_framework import generics
-from applications.post.models import Post
-from applications.post.serializers import PostSerializer
+from applications.post.models import Post, PostImage, Comment
+from applications.post.serializers import PostSerializer, PostImagesSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from applications.post.permissions import IsOwner
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-# from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 
-# class CustomPagination():
-#     page_size = 1
-#     page_size_query_param = 'page_size'
-#     max_page_size = 10000
+
+class CustomPagination():
+    page_size = 1
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
 
 
 # CRUD на классах
@@ -70,9 +73,27 @@ class PostDetailDeleteUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
+class CreateImageAPIView(generics.CreateAPIView):
+    queryset = PostImage.objects.all()
+    serializer_class = PostImagesSerializer
+    permission_classes = [IsAuthenticated]    
 
 
+    # def get_serializer_context(self):
+    #     rep =  super().get_serializer_context()
+    #     rep['context'] = self.request
+    #     return rep
 
 
+class CommentViewSet(ViewSet):
+    def list(self, request):
+        comments = Comment.objects.all()
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+
+class CommentModelViewSet(ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
 
