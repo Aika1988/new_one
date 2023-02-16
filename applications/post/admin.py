@@ -10,7 +10,10 @@ class PostAdmin(admin.ModelAdmin):
     inlines = (ImageAdmin,)
 
 
-    list_display = ('title', 'owner')
+    list_display = ('title', 'owner', 'post_count')
+
+    def post_count(self, obj):
+        return obj.likes.filter(is_like=True).count()
 
 
 

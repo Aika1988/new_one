@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from applications.post.models import Post, PostImage, Comment
-
+from applications.feedback.models import Like
+from applications.feedback.serializers import LikeSerializer
+from django.db.models import Avg
 
 class PostImagesSerializer(serializers.ModelSerializer):
 
@@ -16,13 +18,39 @@ class PostImagesSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     # owner = serializers.ReadOnlyField(required=False)
     images = PostImagesSerializer(many=True, read_only = True)
+    likes = LikeSerializer(many=True, read_only=True)
     owner = serializers.ReadOnlyField(source='owner.email')
-
+  
 
     class Meta():
         model = Post
         # fields = ('title',)
         fields = '__all__'
+
+
+    def to_representation(self, instance):
+        representation =  super().to_representation(instance)
+        representation['like_count'] = instance.likes.filter(is_like=True).count()
+        for like in representation['likes']:
+            if not like['is_like']:
+                representation['likes'].remove()
+        print(instance.ratings.all().aggregate(Avg('rating')), '!!!!!!!!!!!!!!!!!!!')
+        representation['rating'] = instance.ratings.all().aggregate(Avg('rating'))['rating__avg']
+        # rating_result = 0 
+        # for rating in instance.ratings.all(): #post1(r1-2, r2-2, r3-2)
+        #     rating_result += rating.rating   
+        #     if rating_result:
+        #           representation['rating'] = rating_result / instance.ratings.all().count()
+        #     else:
+        #         representation['rating'] = rating_result      
+
+        return representation
+
+    
+
+    
+
+
 
     # def to_representation(self, instance):
     #     representation = super().to_representation(instance)   
@@ -52,8 +80,11 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.email')
 
 
     class Meta:
         model = Comment
-        fields = '__all__'        
+        fields = '__all__'      
+
+
