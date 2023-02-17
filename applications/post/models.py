@@ -11,11 +11,18 @@ class Post(models.Model):
         related_name='posts', 
         verbose_name='Владелец поста',
         )
+    john = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='images', null=True, blank=True)
 
     def __str__(self):
         return f'{self.title}'
+
+    
+    def save(self):
+        self.john = 'John'
+        return super().save()
+
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')

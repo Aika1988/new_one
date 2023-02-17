@@ -1,8 +1,8 @@
 django
 djangorestframework
 psycopg2-binary
-python-decouple
-django-filter
+python-decouple # сокрытие данных 
+django-filter # работа с фильтрами
 Pillow
-drf-yasg
-djangorestframework-simplejwt
+drf-yasg # для свагера
+djangorestframework-simplejwt # jwt токен
